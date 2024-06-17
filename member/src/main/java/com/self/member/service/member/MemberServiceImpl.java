@@ -1,11 +1,13 @@
 package com.self.member.service.member;
 
 import com.self.member.domain.member.Member;
+import com.self.member.domain.refreshtoken.RefreshToken;
 import com.self.member.dto.member.MemberDto;
 import com.self.member.dto.response.ResponseDto;
 import com.self.member.dto.response.ResponseTokenDto;
 import com.self.member.provider.JwtProvider;
 import com.self.member.repository.member.MemberRepository;
+import com.self.member.repository.refreshToken.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 /**
  * @프로젝트명	: foodpie 프로젝트
@@ -36,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 3. 신범식 : 2024. 04. 23  :            : updNickname, updPassword, updPhoneNumber 작성
  * 4. 신범식 : 2024. 05. 09  :            : saveMember , login 메서드 내용
  * 5. 신범식 : 2024. 05. 10  :            : updNickname, updPassword, updPhoneNumber 변경
+ * 6. 신범식 : 2024. 06. 17  :            : refreshtoken 작성
  * ------------------------------------------------------
  * ------------------------------------------------------
  * */
@@ -46,6 +53,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
+
+    private final RefreshTokenRepository refreshTokenRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -97,6 +106,7 @@ public class MemberServiceImpl implements MemberService {
     public ResponseEntity<? super ResponseTokenDto> login(String email, String password , PasswordEncoder passwordEncoder) {
 
         String token = null;
+        String refreshToken = null;
 
         try{
             if(email == null ||email.isEmpty()){
@@ -117,14 +127,46 @@ public class MemberServiceImpl implements MemberService {
             }
 
             token = jwtProvider.create(findMember.getEmail());
+            refreshToken = jwtProvider.createRefreshToken(findMember.getEmail());
+
+            refreshTokenRepository.saveToken(refreshToken , Instant.now().plus(7, ChronoUnit.DAYS),findMember.getEmail());
 
         } catch (Exception exception){
             exception.printStackTrace();
             return ResponseDto.databaseError();
         }
-        return ResponseTokenDto.success(token);
+        return ResponseTokenDto.success(token , refreshToken);
     }
 
+    /**
+     * @메소드명  : refreshtoken
+     * @설명	   : 리프레시 토큰 발행
+     * @작성자   : 신범식
+     * @작성일   : 2024. 06. 17. 오후 02:36:48
+     * @param  : String
+     * @return : ResponseEntity<? super ResponseTokenDto>
+     */
+    @Override
+    public ResponseEntity<? super ResponseTokenDto> refreshtoken(String refreshToken) {
+        String token = null;
+       RefreshToken refreshToken1 = refreshTokenRepository.findByRefreshToken(refreshToken);
+
+        Member member = refreshToken1.getEmail();
+        log.info(">>>>" + member );
+        
+        try {
+            if (refreshToken1.getExpiryDate().compareTo(Date.from(Instant.now())) < 0) {
+                refreshTokenRepository.delete(refreshToken1);
+            }else {
+                token = jwtProvider.create(member.getEmail());
+            }
+        } catch (Exception exception){
+            exception.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+
+        return ResponseTokenDto.success(token , refreshToken);
+    }
 
     /**
      * @메소드명  : loadUserByUsername
@@ -235,4 +277,5 @@ public class MemberServiceImpl implements MemberService {
         }
         return ResponseDto.success();
     }
+
 }

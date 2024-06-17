@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
+
 
 public interface MemberService  {
     ResponseEntity<ResponseDto> saveMember(MemberDto memberDto);
@@ -20,5 +22,7 @@ public interface MemberService  {
     ResponseEntity<ResponseDto> updPassword(String password , String newpassword ,PasswordEncoder passwordEncoder );
 
     ResponseEntity<ResponseDto> updPhoneNumber(String phoneNumber);
+
+    ResponseEntity<? super ResponseTokenDto> refreshtoken(String refreshToken);
 
 }

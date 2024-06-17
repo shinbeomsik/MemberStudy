@@ -2,6 +2,7 @@ package com.self.member.dto.response;
 
 import com.self.member.common.ResponseCode;
 import com.self.member.common.ResponseMessage;
+import com.self.member.domain.refreshtoken.RefreshToken;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ import org.springframework.http.ResponseEntity;
  * ------------------------------------------------------
  * ------------------------------------------------------
  * 1. 신범식 : 2024. 05. 09. :            : 최초 작성
- * 2.
+ * 2. 신범식 : 2024. 06. 17  :            : 리프레시토큰 추가
  * 3.
 
  * ------------------------------------------------------
@@ -30,10 +31,12 @@ import org.springframework.http.ResponseEntity;
 public class ResponseTokenDto extends ResponseDto{
 
     private String token;
+    private String refreshToken;
 
-     private ResponseTokenDto (String token) {
+     private ResponseTokenDto (String token , String refreshToken) {
         super();
         this.token = token;
+        this.refreshToken = refreshToken;
     }
 
 
@@ -45,8 +48,8 @@ public class ResponseTokenDto extends ResponseDto{
      * @param  : String
      * @return : ResponseEntity<ResponseTokenDto>
      */
-    public static ResponseEntity<ResponseTokenDto> success (String token){
-        ResponseTokenDto responseBody = new ResponseTokenDto(token);
+    public static ResponseEntity<ResponseTokenDto> success (String token , String refreshToken){
+        ResponseTokenDto responseBody = new ResponseTokenDto(token , refreshToken);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseBody);
     }

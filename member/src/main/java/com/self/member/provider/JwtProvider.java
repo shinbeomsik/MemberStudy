@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -27,13 +28,14 @@ import java.util.Date;
  * ------------------------------------------------------
  * ------------------------------------------------------
  * 1. 신범식 : 2024. 05. 06. :            : 최초 작성
- * 2.
+ * 2. 신범식 : 2024. 06. 17  :            : createRefreshToken 추가작성
  * 3.
 
  * ------------------------------------------------------
  * ------------------------------------------------------
  * */
 @Component
+@Slf4j
 public class JwtProvider {
 
     @Value("${secret-key}")
@@ -48,13 +50,35 @@ public class JwtProvider {
      */
     public String create(String email) {
 
-        Date expiredDate = Date.from(Instant.now().plus(1,ChronoUnit.HOURS));
+        Date expiredDate = Date.from(Instant.now().plus(1,ChronoUnit.MINUTES));
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
 
         String jwt = Jwts.builder()
                 .signWith(key, SignatureAlgorithm.HS256)
                 .setSubject(email)
-                .setIssuedAt(new Date()).setExpiration(expiredDate)
+                .setIssuedAt(new Date())
+                .setExpiration(expiredDate)
+                .compact();
+
+        return jwt;
+    }
+    /**
+     * @param : String
+     * @메소드명 : createRefreshToken
+     * @설명     : JWT 리프레시토큰 생성
+     * @작성자 : 신범식
+     * @작성일 : 2024. 06. 17. 오후 02:36:48
+     */
+    public String createRefreshToken(String email) {
+
+        Date expiredDate = Date.from(Instant.now().plus(7,ChronoUnit.DAYS));
+        Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+
+        String jwt = Jwts.builder()
+                .signWith(key, SignatureAlgorithm.HS256)
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(expiredDate)
                 .compact();
 
         return jwt;

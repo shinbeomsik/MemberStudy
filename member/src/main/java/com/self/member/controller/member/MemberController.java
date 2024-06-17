@@ -32,6 +32,7 @@ import java.util.Map;
  * 3. 신범식 : 2024. 04. 23  :            : updateNickname, updatePassword, updatePhoneNumber, mapping에  /member 작성
  * 4. 신범식 : 2024. 05. 09  :            : saveMember, login 메서드 내용 변경 , handleValidationExceptions 삭제
  * 5. 신범식 : 2024. 05. 10  :            : updateNickname, updatePassword, updatePhoneNumber 변경
+ * 6. 신범식 : 2024. 06. 17  :            : refreshToken 작성
  * ------------------------------------------------------
  * ------------------------------------------------------
  * */
@@ -76,6 +77,22 @@ public class MemberController {
             ResponseEntity<? super ResponseTokenDto> response = memberService.login(email,password, passwordEncoder);
 
             return response;
+    }
+
+    /**
+     * @메소드명  : refreshToken
+     * @설명	   : 리프레시토큰 발행
+     * @작성자   : 신범식
+     * @작성일   : 2024. 06. 17. 오전 10:30:57
+     * @param  : Map<String, String>
+     * @return : ResponseEntity<? super ResponseTokenDto>
+     */
+    @PostMapping("/refreshToken")
+    public ResponseEntity<? super ResponseTokenDto> refreshToken(@RequestBody Map<String, String> paramMap){
+        String refreshToken = paramMap.get("refreshToken");
+        ResponseEntity<? super ResponseTokenDto> response = memberService.refreshtoken(refreshToken);
+
+        return response;
     }
 
     /**
