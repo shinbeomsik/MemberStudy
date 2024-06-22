@@ -9,9 +9,11 @@ JPA 를 사용해서 RestfulApi 작성
 ```java
 - Spring Security
 - JWT Token
+- JWT RefreshToken
 - 소셜 로그인
 ```
 
 ## 기능추가예정
- - JWT RefreshToken
+ - 에러 발생한 부분 고치기
+ - 
  - 
